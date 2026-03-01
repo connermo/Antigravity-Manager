@@ -2384,15 +2384,11 @@ impl TokenManager {
     }
 
     /// 获取当前所有可用账号中收集到的官方下发的所有动态模型集合
-    /// 同时包含归一化后的 model_quotas key 和上游原始模型名，
-    /// 以便 models 列表能展示上游实际下发的原始模型名（如 gemini-3.1-flash-image）。
+    /// 只返回上游原始模型名（未归一化），避免内部配额保护 key（如 gemini-3-pro-image）泄漏到用户可见的 models 列表。
     pub fn get_all_collected_models(&self) -> std::collections::HashSet<String> {
         let mut all_models = std::collections::HashSet::new();
         for entry in self.tokens.iter() {
             let token = entry.value();
-            for model_id in token.model_quotas.keys() {
-                all_models.insert(model_id.clone());
-            }
             for model_id in &token.raw_model_names {
                 all_models.insert(model_id.clone());
             }
